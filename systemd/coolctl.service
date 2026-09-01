@@ -1,0 +1,13 @@
+[Unit]
+Description=coolctl AIO LCD Daemon
+Conflicts=deepcool-lm.service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/coolctld
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target

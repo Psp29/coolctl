@@ -1,0 +1,21 @@
+[package]
+name = "coolctl-gui"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "coolctl-gui"
+path = "src/main.rs"
+
+[dependencies]
+gtk4 = { version = "0.11", features = ["v4_10"] }
+cairo-rs = { version = "0.22", features = ["png"] }
+image = { version = "0.25", default-features = false, features = ["gif", "png", "jpeg", "webp"] }
+coolctl-core = { path = "../coolctl-core" }
+serde_json = "1"
+async-channel = "2"
+gstreamer = "0.25"
+gstreamer-app = "0.25"
+gstreamer-video = "0.25"
+gstreamer-pbutils = "0.25"
+glib = "0.22"

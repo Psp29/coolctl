@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=coolctl
+Comment=DeepCool AIO LCD media editor and monitor
+Exec=coolctl-gui
+Icon=video-display
+Categories=Utility;
+Terminal=false

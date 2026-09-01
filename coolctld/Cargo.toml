@@ -1,0 +1,18 @@
+[package]
+name = "coolctld"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "coolctld"
+path = "src/main.rs"
+
+[dependencies]
+coolctl-core = { path = "../coolctl-core" }
+rusb = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+image = { version = "0.25", default-features = false }
+imageproc = "0.25"
+ab_glyph = "0.2"
+toml = "0.8"
