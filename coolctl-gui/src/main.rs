@@ -30,6 +30,15 @@ fn main() {
 }
 
 fn build_ui(app: &Application) {
+    // `Application` is single-instance by default (GApplication D-Bus
+    // activation): launching coolctl-gui again while one is already running
+    // doesn't start a second process, it re-fires `activate` in this one. Without
+    // this check that used to build a second window on top of the first.
+    if let Some(window) = app.windows().first() {
+        window.present();
+        return;
+    }
+
     let window = ApplicationWindow::builder()
         .application(app)
         .title("coolctl")
