@@ -24,6 +24,6 @@ package() {
     install -Dm755 target/release/coolctld "$pkgdir/usr/bin/coolctld"
     install -Dm755 target/release/coolctl-gui "$pkgdir/usr/bin/coolctl-gui"
     install -Dm644 systemd/coolctl.service "$pkgdir/usr/lib/systemd/system/coolctl.service"
-    install -Dm644 packaging/coolctl-gui.desktop "$pkgdir/usr/share/applications/coolctl-gui.desktop"
+    install -Dm644 packaging/org.coolctl.Gui.desktop "$pkgdir/usr/share/applications/org.coolctl.Gui.desktop"
     install -Dm644 packaging/icons/coolctl-gui.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/coolctl-gui.svg"
 }

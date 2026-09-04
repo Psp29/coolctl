@@ -18,8 +18,16 @@ fn main() {
     let device = match Lm360::connect() {
         Ok(d) => d,
         Err(e) => {
-            eprintln!("failed to connect: {e}");
-            std::process::exit(1);
+            // Don't exit(1) here: a boot-time USB enumeration race (device not
+            // yet present) would otherwise crash-loop the process and can burn
+            // through systemd's default restart-burst limit, landing the unit
+            // in `failed` with nothing driving the panel until someone notices
+            // and restarts it manually. Wait it out instead, same as the
+            // mid-run disconnect recovery below — this only polls libusb
+            // open/claim every 2s, it never touches the panel itself, so it
+            // can't trigger the earlier frame-flood wedge issue.
+            eprintln!("failed to connect: {e} — waiting for device...");
+            Lm360::connect_retrying(Duration::from_secs(2))
         }
     };
     let device = Arc::new(Mutex::new(device));
