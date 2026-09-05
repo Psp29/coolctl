@@ -60,9 +60,24 @@ fn main() {
 
     ipc::spawn(display_state.clone(), device.clone());
 
+    // Preventive periodic reconnect: a long-running session (observed after ~22h of
+    // continuous Media-mode playback) can leave the panel's own firmware silently
+    // wedged — accepting/ACKing writes but no longer rendering them — with zero
+    // host-side USB error to react to (see project notes on the 2026-09-01/09-05
+    // "silent wedge" incidents). Forcing a full disconnect/reconnect/init_query cycle
+    // periodically, regardless of mode, bounds how long that wedge can persist
+    // unnoticed, at the cost of a few seconds of blank/glitchy panel each time it fires.
+    const REINIT_INTERVAL: Duration = Duration::from_secs(4 * 60 * 60);
+    let mut last_reinit = Instant::now();
+
     println!("entering render loop (Ctrl+C to stop)");
     loop {
         let tick_start = Instant::now();
+
+        if last_reinit.elapsed() >= REINIT_INTERVAL {
+            periodic_reinit(&device);
+            last_reinit = Instant::now();
+        }
 
         let (mode, orientation, solid_color, tick_interval_ms) = {
             let s = display_state.lock().unwrap();
@@ -147,4 +162,19 @@ fn reconnect_device(device: &Arc<Mutex<Lm360>>) {
     }
     *device.lock().unwrap() = new_device;
     println!("reconnected to LM360");
+}
+
+/// Forces a fresh reconnect even though the device never actually left the bus —
+/// see `REINIT_INTERVAL`'s doc comment above for why. Releases the current handle
+/// first (unlike `reconnect_device`, where the device is already gone) so the
+/// fresh `connect()` doesn't hit `Resource busy`.
+fn periodic_reinit(device: &Arc<Mutex<Lm360>>) {
+    println!("performing periodic preventive reconnect...");
+    device.lock().unwrap().release();
+    let new_device = Lm360::connect_retrying(Duration::from_secs(2));
+    if let Err(e) = new_device.init_query() {
+        eprintln!("init_query failed after periodic reconnect: {e}");
+    }
+    *device.lock().unwrap() = new_device;
+    println!("periodic reconnect complete");
 }

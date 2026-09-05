@@ -54,6 +54,15 @@ impl Lm360 {
         }
     }
 
+    /// Best-effort release of the claimed interface without consuming `self`.
+    /// Used before a *preventive* reconnect (device never actually left the
+    /// bus, unlike the `NoDevice` recovery path) so the fresh `connect()`
+    /// doesn't hit `Resource busy` claiming an interface this same handle
+    /// still holds.
+    pub fn release(&self) {
+        let _ = self.handle.release_interface(INTERFACE);
+    }
+
     fn write(&self, data: &[u8]) -> rusb::Result<usize> {
         self.handle.write_bulk(EP_OUT, data, WRITE_TIMEOUT)
     }
